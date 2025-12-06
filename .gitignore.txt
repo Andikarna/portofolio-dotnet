@@ -1,80 +1,153 @@
-# =========================
-# Visual Studio / IDE files
-# =========================
-.vs/
-*.suo
+## -----------------------------
+## .NET 8 / Visual Studio Base
+## -----------------------------
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# User-specific files
 *.user
 *.userosscache
+*.suo
 *.sln.docstates
-*.VC.db
-*.VC.VC.opendb
+*.userprefs
 
-# JetBrains Rider
-.idea/
-*.DotSettings.user
-*.ReSharper
-_ReSharper*/
-*.ReSharper.*
+# Visual Studio cache/options directory
+.vs/
 
-# =========================
-# Build & output folders
-# =========================
-bin/
-obj/
+# Backup & temporary files
+*~
+*.swp
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+
+# Build outputs
+*.dll
+*.exe
+*.app
+*.appx
+*.apk
+*.dmg
+*.pkg
+*.msi
+
+# Publish output
+publish/
 out/
-TestResults/
-*.builds
+dist/
+artifacts/
 
-# =========================
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+.history/
+
 # NuGet
-# =========================
 *.nupkg
+*.snupkg
+*.nuspec
 packages/
 project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# =========================
-# ASP.NET / Web
-# =========================
-wwwroot/lib/
+# ASP.NET Core environment files
+appsettings.*.local.json
+appsettings.Development.json
+secrets.json
+.env
+*.env
+
+# Entity Framework Migrations snapshot files (optional)
+#migrations/
+
+# Azure functions local settings
+local.settings.json
+
+# Logs and diagnostic files
+*.log
+*.tlog
+*.etl
+*.dmp
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Test results
+TestResults/
+*.TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NCrunch
+_ncrunch_*
+.*crunch*.local.xml
+
+# Node (for SPA or frontend in .NET solution)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
 
-# =========================
-# User-specific files
-# =========================
-*.rsuser
-*.userprefs
-*.pidb
-*.booproj
-*.svd
+# Frontend build
+wwwroot/dist/
+wwwroot/js/
+wwwroot/css/
+wwwroot/lib/
+clientapp/build/
+clientapp/dist/
 
-# =========================
-# Mac / Linux
-# =========================
-*.DS_Store
-*.AppleDouble
-*.LSOverride
-._*
-.Spotlight-V100
-.Trashes
+# Docker
+*.dockerignore
+docker-compose.override.yml
+docker-compose.*.yml
+.docker/
+tmp/
 
-# =========================
-# Logs
-# =========================
-*.log
-*.tlog
-*.vsmdi
+# JetBrains Rider settings
+.idea/
+*.iml
+*.ipr
+*.iws
 
-# =========================
-# Temporary / cache files
-# =========================
-*.tmp
-*.temp
-*.bak
-*.backup
-*.swp
-*.lock
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# Secrets or keys
+*.pfx
+*.key
+*.cer
+*.pem
+secrets/
+PrivateKeys/
+
+# Others (optional)
+coverage/
+CoverageResults/
+.vscode-test/
