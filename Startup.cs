@@ -147,6 +147,8 @@ namespace BasicProject
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHttpsRedirection();
+
             // Swagger Middleware
             app.UseSwagger();
 
