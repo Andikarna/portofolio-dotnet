@@ -29,14 +29,10 @@ namespace BasicProject
         public void ConfigureServices(IServiceCollection services)
         {
             
-
             // Database
             services.AddDbContext<PTPDevContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("PTP"),
                 Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.28-mariadb")));
-
-
-           
 
             // Repository & Service
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
