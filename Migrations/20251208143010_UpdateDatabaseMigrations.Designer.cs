@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace PTP.Migrations
 {
     [DbContext(typeof(PTPDevContext))]
-    [Migration("20251208134821_AutoMigration")]
-    partial class AutoMigration
+    [Migration("20251208143010_UpdateDatabaseMigrations")]
+    partial class UpdateDatabaseMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseCollation("utf8mb4_0900_ai_ci")
+                .UseCollation("utf8mb4_general_ci")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
@@ -102,6 +102,12 @@ namespace PTP.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("nama");
+
+                    b.Property<DateTime?>("RefreshExpiredTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Token")
                         .HasColumnType("text")
