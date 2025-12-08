@@ -1,6 +1,5 @@
 using AdidataDbContext.Models.Mysql.PTPDev;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,6 +10,7 @@ using PTP.Dto;
 using PTP.Interface;
 using PTP.Service;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using System;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -28,10 +28,15 @@ namespace BasicProject
 
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
             // Database
             services.AddDbContext<PTPDevContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("PTP"),
                 Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.28-mariadb")));
+
+
+           
 
             // Repository & Service
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
@@ -140,6 +145,8 @@ namespace BasicProject
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+
             app.UseCors("AllowAll");
 
             if (env.IsDevelopment())
@@ -188,7 +195,6 @@ namespace BasicProject
                 c.RoutePrefix = "swagger";
                 c.DocumentTitle = "Recruitment API Documentation";
                 c.DocExpansion(DocExpansion.List);
-
             });
 
             app.UseRouting();
