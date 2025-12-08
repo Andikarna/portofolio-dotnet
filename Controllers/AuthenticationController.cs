@@ -16,6 +16,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using PTP.Service;
+using PTP.Dto.AuthDto;
+using System.Threading.Tasks;
 
 
 namespace BasicProject.Controllers
@@ -25,15 +27,20 @@ namespace BasicProject.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly AuthenticationService authServices;
+        private readonly PTPDevContext context;
 
-        public AuthenticationController(AuthenticationService authServices)
+        public AuthenticationController(
+            AuthenticationService authServices,
+            PTPDevContext context
+            )
         {
+            this.context = context;
             this.authServices = authServices;
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] Login login) 
+        public async Task<IActionResult> Login([FromBody] Login login)
         {
             try
             {
@@ -41,7 +48,8 @@ namespace BasicProject.Controllers
                 var response = await authServices.Login(login, ipAddress);
                 return Ok(response);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Error " + ex.Message);
             }
         }
@@ -72,8 +80,33 @@ namespace BasicProject.Controllers
         {
             var users = await authServices.GetAllUsersAsync();
             return Ok(users);
-        }       
+        }
 
+
+        [HttpGet]
+        public async Task<IActionResult> CreateUser([FromQuery] CreateUserDto request)
+        {
+            var user = new User
+            {
+                Name = request.Username,
+                Password = request.Password,
+                Email = request.Email,
+                CreatedDate = DateTime.Now,
+            };
+
+            context.Users.Add(user);    
+            await context.SaveChangesAsync();
+
+            var result = new
+            {
+                Status = 200,
+                Message = "Berhasil Membuat Account",
+                Data = Enumerable.Empty<object>(),
+            };
+
+            return Ok(result);
+
+        }
     }
 }
 
