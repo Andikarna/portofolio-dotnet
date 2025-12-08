@@ -40,11 +40,11 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
-            //    .HasCharSet("utf8mb4");
+            modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
+                .HasCharSet("utf8mb4");
 
-            modelBuilder.UseCollation("utf8mb4_general_ci");
-            modelBuilder.HasCharSet("utf8mb4");
+            //modelBuilder.UseCollation("utf8mb4_general_ci");
+            //modelBuilder.HasCharSet("utf8mb4");
 
             base.OnModelCreating(modelBuilder);
 
