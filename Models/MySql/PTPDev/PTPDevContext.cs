@@ -23,15 +23,30 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;port=3306;user=root;password=123456;database=PTP-Dev", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.28-mysql"));
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppContext.BaseDirectory)
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .Build();
+
+                var connectionString = configuration.GetConnectionString("PTP");
+
+                var serverVersion = new MySqlServerVersion(new Version(10, 4, 28));
+
+                optionsBuilder.UseMySql(connectionString, serverVersion);
             }
+
         }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
                 .HasCharSet("utf8mb4");
+
+            //modelBuilder.UseCollation("utf8mb4_general_ci");
+            //modelBuilder.HasCharSet("utf8mb4");
+
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>(entity =>
             {

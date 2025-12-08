@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PTP.Migrations
 {
     /// <inheritdoc />
-    public partial class AutoMigration : Migration
+    public partial class UpdateDatabaseMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,15 +21,15 @@ namespace PTP.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MobilePhone = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     roleid = table.Column<int>(type: "int", nullable: true),
+                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MobilePhone = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_general_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     created_date = table.Column<DateTime>(type: "datetime", nullable: true),
                     update_date = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
@@ -38,7 +38,7 @@ namespace PTP.Migrations
                     table.PrimaryKey("PK_users", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+                .Annotation("Relational:Collation", "utf8mb4_general_ci");
 
             migrationBuilder.CreateTable(
                 name: "users_token",
@@ -46,15 +46,18 @@ namespace PTP.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    nama = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    nama = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    token = table.Column<string>(type: "text", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    token = table.Column<string>(type: "text", nullable: true, collation: "utf8mb4_general_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RefreshToken = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_general_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     created_time = table.Column<DateTime>(type: "datetime", nullable: true),
                     expired_time = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ip_address = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    RefreshExpiredTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ip_address = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    hostname = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    hostname = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_general_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     userId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -63,7 +66,7 @@ namespace PTP.Migrations
                     table.PrimaryKey("PK_users_token", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+                .Annotation("Relational:Collation", "utf8mb4_general_ci");
         }
 
         /// <inheritdoc />
