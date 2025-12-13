@@ -1,112 +1,119 @@
 ﻿
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using Microsoft.EntityFrameworkCore;
-using Dapper;
-using System.Transactions;
-using System.Data;
 using AdidataDbContext.Models.Mysql.PTPDev;
-using NPOI.SS.Formula.Functions;
-using NPOI.POIFS.Crypt.Dsig;
-using Org.BouncyCastle.Asn1.Cms;
+using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using PTP.Service;
+using NPOI.POIFS.Crypt.Dsig;
+using NPOI.SS.Formula.Functions;
+using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Utilities.Net;
+using PTP.Components;
 using PTP.Dto.AuthDto;
+using PTP.Helper;
+using PTP.Service;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 
-namespace BasicProject.Controllers
+namespace PTP.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
+        private readonly IConfiguration configuration;
         private readonly AuthenticationService authServices;
         private readonly PTPDevContext context;
+        private readonly ResponseStatusHeader header;
+        
 
         public AuthenticationController(
             AuthenticationService authServices,
-            PTPDevContext context
+            PTPDevContext context,
+            ResponseStatusHeader header,
+            IConfiguration configuration
             )
         {
             this.context = context;
             this.authServices = authServices;
+            this.header = header;
+            this.configuration = configuration;
         }
-
-
-        [HttpPost]
-        public async Task<IActionResult> Login([FromBody] Login login)
-        {
-            try
-            {
-                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-                var response = await authServices.Login(login, ipAddress);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Error " + ex.Message);
-            }
-        }
-
-
-        [HttpDelete]
-        public async Task<IActionResult> Logout([FromQuery] int id)
-        {
-            try
-            {
-                var response = await authServices.Logout(id);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Error " + ex.Message);
-            }
-        }
-
-        //var users = User.FindFirst("UserId")?.Value;
-        //int userId = int.Parse(users);
-        //var user = await ptpDevContext.Users.FindAsync(userId);
-
-        /*[Authorize]
-        [DisableCors]*/
-        [HttpGet]
-        public async Task<IActionResult> GetUser()
-        {
-            var users = await authServices.GetAllUsersAsync();
-            return Ok(users);
-        }
-
 
         [HttpGet]
         public async Task<IActionResult> CreateUser([FromQuery] CreateUserDto request)
         {
-            var user = new User
-            {
-                Name = request.Username,
-                Password = request.Password,
-                Email = request.Email,
-                CreatedDate = DateTime.Now,
-            };
 
-            context.Users.Add(user);    
-            await context.SaveChangesAsync();
-
-            var result = new
-            {
-                Status = 200,
-                Message = "Berhasil Membuat Account",
-                Data = Enumerable.Empty<object>(),
-            };
-
-            return Ok(result);
-
+            var result = await authServices.CreateUserAsync(request);
+            return header.BuildResponse(result);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] Login login)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var result = await authServices.LoginAsync(login, ipAddress);
+            return header.BuildResponse(result);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> RefreshToken([FromQuery] RefreshTokenDto request)
+        {
+            var key = configuration["Jwt:Key"];
+            var validation = TokenService.ValidateToken(User, Request, key);
+            var existToken = await context.UsersTokens.FirstOrDefaultAsync(x => x.UserId == validation.UserId);
+            if (existToken == null)
+            {
+                return header.BuildResponse(new
+                {
+                    Status = 401,
+                    Message = "User not login"
+                });
+            }
+
+            var result = await authServices.RefreshTokenAsync(request);
+            return header.BuildResponse(result);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Logout([FromQuery] int id)
+        {
+            var result = await authServices.LogoutAsync(id);
+            return header.BuildResponse(result);
+        }
+
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetUser()
+        {
+            var key = configuration["Jwt:Key"];
+            var validation = TokenService.ValidateToken(User, Request, key);
+            var existToken = await context.UsersTokens.FirstOrDefaultAsync(x => x.UserId == validation.UserId);
+            if (existToken == null)
+            {
+                return header.BuildResponse(new
+                {
+                    Status = 401,
+                    Message = "User not login"
+                });
+            }
+
+            var result = await authServices.GetAllUsersAsync();
+            return header.BuildResponse(result);
+        }
+
+
+       
     }
 }
 
