@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using PTP.Models.MySql.PTPDev;
 
 namespace AdidataDbContext.Models.Mysql.PTPDev
 {
@@ -18,6 +19,7 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
 
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UsersToken> UsersTokens { get; set; } = null!;
+        public virtual DbSet<MasterRole> MasterRoles { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -40,11 +42,11 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
-            //    .HasCharSet("utf8mb4");
+            modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
+                .HasCharSet("utf8mb4");
 
-            modelBuilder.UseCollation("utf8mb4_general_ci");
-            modelBuilder.HasCharSet("utf8mb4");
+            //modelBuilder.UseCollation("utf8mb4_general_ci");
+            //modelBuilder.HasCharSet("utf8mb4");
 
             base.OnModelCreating(modelBuilder);
 

@@ -1,7 +1,8 @@
 using AdidataDbContext.Models.Mysql.PTPDev;
 using Microsoft.EntityFrameworkCore;
+using PTP;
 
-namespace BasicProject
+namespace PTP
 {
     public class Program
     {
@@ -15,7 +16,7 @@ namespace BasicProject
             using (var scope = host.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<PTPDevContext>();
-                db.Database.Migrate();
+                //db.Database.Migrate();
             }
 
             host.Run();
