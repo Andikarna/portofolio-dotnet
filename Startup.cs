@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
 using Newtonsoft.Json.Serialization;
-using PTP.AuthenticationRepository;
+using PTP.Components;
 using PTP.Dto;
 using PTP.Interface;
 using PTP.Service;
@@ -15,7 +15,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace BasicProject
+namespace PTP
 {
     public class Startup
     {
@@ -35,7 +35,6 @@ namespace BasicProject
                 Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.28-mariadb")));
 
             // Repository & Service
-            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<AuthenticationService>();
 
             // Minio
@@ -51,6 +50,8 @@ namespace BasicProject
                     .WithSSL(config.UseSSL)
                     .Build();
             });
+
+            services.AddScoped<ResponseStatusHeader>();
 
             // Controllers
             services.AddControllers()
@@ -127,9 +128,15 @@ namespace BasicProject
             // CORS
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
-                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
             });
+
+
 
             services.AddDistributedMemoryCache();
 
@@ -141,9 +148,6 @@ namespace BasicProject
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-
-            app.UseCors("AllowAll");
 
             if (env.IsDevelopment())
             {
@@ -193,8 +197,11 @@ namespace BasicProject
                 c.DocExpansion(DocExpansion.List);
             });
 
+
+            app.UseCors("AllowAll");
             app.UseRouting();
             app.UseSession();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
