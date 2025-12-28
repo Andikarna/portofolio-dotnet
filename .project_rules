@@ -64,7 +64,6 @@
 
 # Data Rules
 - Models: Located in `Models/Mysql/PTPDev`. Likely Database-First approach (scaffolded).
-  - **CRITICAL**: The namespace for these models MUST be `AdidataDbContext.Models.Mysql.PTPDev` (lowercase `Mysql`). Do NOT change this to `MySql` even though the folder is named `MySql`. This mismatch is intentional/legacy and changing it will cause duplicate definition errors.
 - Validation: Manual checks in Service (e.g., `if (user == null)`).
 - Migrations: `Migrations` folder present (EF Core Migrations supported).
 

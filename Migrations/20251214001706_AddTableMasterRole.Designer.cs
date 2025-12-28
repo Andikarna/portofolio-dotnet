@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace PTP.Migrations
 {
     [DbContext(typeof(PTPDevContext))]
-    [Migration("20251213154030_AddTableMasterRole")]
+    [Migration("20251214001706_AddTableMasterRole")]
     partial class AddTableMasterRole
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace PTP.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseCollation("utf8mb4_0900_ai_ci")
+                .UseCollation("utf8mb4_general_ci")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 

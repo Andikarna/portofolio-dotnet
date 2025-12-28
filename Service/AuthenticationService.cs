@@ -186,11 +186,11 @@ namespace PTP.Service
                     Nama = user.Name,
                     Token = tokenValue,
                     RefreshToken = refreshToken,
-                    RefreshExpiredTime = refreshTokenExpiry,
                     IpAddress = ipAddress,
                     Hostname = Dns.GetHostName(),
-                    CreatedTime = DateTime.UtcNow.AddHours(7),  
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
                     ExpiredTime = DateTime.UtcNow.AddMinutes(5).AddHours(7),
+                    RefreshExpiredTime = refreshTokenExpiry,
                 };
 
                 context.UsersTokens.Add(userToken);
