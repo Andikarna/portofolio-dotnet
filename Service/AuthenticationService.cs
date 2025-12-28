@@ -59,7 +59,7 @@ namespace PTP.Service
                     Name = request.Username,
                     Password = hashPassword,
                     Email = request.Email,
-                    CreatedDate = DateTime.Now,
+                    CreatedDate = DateTime.UtcNow.AddHours(7),
                 };
 
                 context.Users.Add(user);
@@ -171,7 +171,7 @@ namespace PTP.Service
                     configuration["Jwt:Issuer"],
                     configuration["Jwt:Audience"],
                     claims,
-                    expires: DateTime.UtcNow.AddMinutes(5),
+                    expires: DateTime.UtcNow.AddMinutes(5).AddHours(7),
                     signingCredentials: signin
                 );
                 string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
@@ -289,7 +289,7 @@ namespace PTP.Service
                     issuer: configuration["Jwt:Issuer"],
                     audience: configuration["Jwt:Audience"],
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(5),
+                    expires: DateTime.UtcNow.AddMinutes(5).AddHours(7),
                     signingCredentials: signin
                 );
 
