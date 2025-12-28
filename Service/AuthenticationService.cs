@@ -59,7 +59,7 @@ namespace PTP.Service
                     Name = request.Username,
                     Password = hashPassword,
                     Email = request.Email,
-                    CreatedDate = DateTime.Now,
+                    CreatedDate = DateTime.UtcNow.AddHours(7),
                 };
 
                 context.Users.Add(user);
@@ -171,13 +171,13 @@ namespace PTP.Service
                     configuration["Jwt:Issuer"],
                     configuration["Jwt:Audience"],
                     claims,
-                    expires: DateTime.Now.AddMinutes(2),
+                    expires: DateTime.UtcNow.AddMinutes(5).AddHours(7),
                     signingCredentials: signin
                 );
                 string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
 
                 var refreshToken = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
-                var refreshTokenExpiry = DateTime.Now.AddMinutes(5);
+                var refreshTokenExpiry = DateTime.UtcNow.AddMinutes(30).AddHours(7);
               
 
                 var userToken = new UsersToken
@@ -189,8 +189,8 @@ namespace PTP.Service
                     RefreshExpiredTime = refreshTokenExpiry,
                     IpAddress = ipAddress,
                     Hostname = Dns.GetHostName(),
-                    CreatedTime = DateTime.Now,
-                    ExpiredTime = DateTime.Now.AddMinutes(2),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),  
+                    ExpiredTime = DateTime.UtcNow.AddMinutes(5).AddHours(7),
                 };
 
                 context.UsersTokens.Add(userToken);
@@ -289,14 +289,14 @@ namespace PTP.Service
                     issuer: configuration["Jwt:Issuer"],
                     audience: configuration["Jwt:Audience"],
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(2),
+                    expires: DateTime.UtcNow.AddMinutes(5).AddHours(7),
                     signingCredentials: signin
                 );
 
                 string tokenValue = new JwtSecurityTokenHandler().WriteToken(newAccessToken);
 
                 tokenEntry.Token = tokenValue;
-                tokenEntry.ExpiredTime = DateTime.Now.AddMinutes(2);
+                tokenEntry.ExpiredTime = DateTime.UtcNow.AddMinutes(5).AddHours(7);
                 await context.SaveChangesAsync();
 
                 return new ResponseObject

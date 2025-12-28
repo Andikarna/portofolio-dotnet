@@ -17,203 +17,204 @@ using System.Text.Json;
 
 namespace PTP
 {
-    public class Startup
+  public class Startup
+  {
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+      Configuration = configuration;
+    }
 
-        public IConfiguration Configuration { get; }
+    public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            
-            // Database
-            services.AddDbContext<PTPDevContext>(options =>
-                options.UseMySql(Configuration.GetConnectionString("PTP"),
-                Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.28-mariadb")));
+    public void ConfigureServices(IServiceCollection services)
+    {
 
-            // Repository & Service
-            services.AddScoped<AuthenticationService>();
+      // Database
+      services.AddDbContext<PTPDevContext>(options =>
+          options.UseMySql(Configuration.GetConnectionString("PTP"),
+          Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.28-mariadb")));
 
-            // Minio
-            services.Configure<MinioSettings>(Configuration.GetSection("Minio"));
-            services.AddSingleton<IMinioClient>(sp =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>()
-                               .GetSection("Minio")
-                               .Get<MinioSettings>();
-                return new MinioClient()
-                    .WithEndpoint(config.Endpoint)
-                    .WithCredentials(config.AccessKey, config.SecretKey)
-                    .WithSSL(config.UseSSL)
-                    .Build();
-            });
+      // Repository & Service
+      services.AddScoped<AuthenticationService>();
+      services.AddScoped<IExperienceService, ExperienceService>();
 
-            services.AddScoped<ResponseStatusHeader>();
+      // Minio
+      services.Configure<MinioSettings>(Configuration.GetSection("Minio"));
+      services.AddSingleton<IMinioClient>(sp =>
+      {
+        var config = sp.GetRequiredService<IConfiguration>()
+                             .GetSection("Minio")
+                             .Get<MinioSettings>();
+        return new MinioClient()
+                  .WithEndpoint(config.Endpoint)
+                  .WithCredentials(config.AccessKey, config.SecretKey)
+                  .WithSSL(config.UseSSL)
+                  .Build();
+      });
 
-            // Controllers
-            services.AddControllers()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                });
+      services.AddScoped<ResponseStatusHeader>();
 
-            // JWT Authentication
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-           .AddJwtBearer(options =>
-           {
-               options.TokenValidationParameters = new TokenValidationParameters
+      // Controllers
+      services.AddControllers()
+          .AddNewtonsoftJson(options =>
+          {
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+          });
+
+      // JWT Authentication
+      services.AddAuthentication(options =>
+      {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      })
+     .AddJwtBearer(options =>
+     {
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+         ValidateIssuer = true,
+         ValidateAudience = true,
+         ValidateLifetime = true,
+         ValidateIssuerSigningKey = true,
+         ValidIssuer = Configuration["Jwt:Issuer"],
+         ValidAudience = Configuration["Jwt:Audience"],
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
+       };
+       options.Events = new JwtBearerEvents
+       {
+         OnChallenge = context =>
                {
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
-                   ValidateLifetime = true,
-                   ValidateIssuerSigningKey = true,
-                   ValidIssuer = Configuration["Jwt:Issuer"],
-                   ValidAudience = Configuration["Jwt:Audience"],
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
-               };
-               options.Events = new JwtBearerEvents
-               {
-                   OnChallenge = context =>
-                   {
-                       context.HandleResponse();
-                       context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                       context.Response.ContentType = "application/json";
-                       var result = JsonSerializer.Serialize(new { message = "Unauthorized Token" });
-                       return context.Response.WriteAsync(result);
-                   }
-               };
-           });
+               context.HandleResponse();
+               context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+               context.Response.ContentType = "application/json";
+               var result = JsonSerializer.Serialize(new { message = "Unauthorized Token" });
+               return context.Response.WriteAsync(result);
+             }
+       };
+     });
 
-            // Swagger
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Recruitment API Services",
-                    Version = "v1",
-                    Description = "API Documentation - Protected with Basic Auth"
-                });
+      // Swagger
+      services.AddSwaggerGen(c =>
+      {
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+          Title = "Recruitment API Services",
+          Version = "v1",
+          Description = "API Documentation - Protected with Basic Auth"
+        });
 
-                // JWT Bearer
-                var securitySchema = new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-                c.AddSecurityDefinition("Bearer", securitySchema);
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+        // JWT Bearer
+        var securitySchema = new OpenApiSecurityScheme
+        {
+          In = ParameterLocation.Header,
+          Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+          Name = "Authorization",
+          Type = SecuritySchemeType.ApiKey,
+          Scheme = "bearer",
+          BearerFormat = "JWT",
+          Reference = new OpenApiReference
+          {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+          }
+        };
+        c.AddSecurityDefinition("Bearer", securitySchema);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+          {
                     { securitySchema, new string[] { } }
-                });
+          });
 
-            });
+      });
 
-            // CORS
-            services.AddCors(options =>
+      // CORS
+      services.AddCors(options =>
+      {
+        options.AddPolicy("AllowAll", policy =>
+              {
+            policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+          });
+      });
+
+
+
+      services.AddDistributedMemoryCache();
+
+      // Session
+      services.AddSession(option => option.IdleTimeout = TimeSpan.FromMinutes(5));
+
+      services.AddHttpContextAccessor();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+
+      if (env.IsDevelopment())
+      {
+        app.UseDeveloperExceptionPage();
+      }
+
+      app.UseHttpsRedirection();
+
+      // Swagger Middleware
+      app.UseSwagger();
+
+      app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
+      {
+        appBuilder.Use(async (context, next) =>
+              {
+            string authHeader = context.Request.Headers["Authorization"];
+
+            if (authHeader != null && authHeader.StartsWith("Basic "))
             {
-                options.AddPolicy("AllowAll", policy =>
+              var encoded = authHeader.Substring("Basic ".Length).Trim();
+              var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
+              var parts = decoded.Split(':');
+
+              if (parts.Length == 2)
+              {
+                var username = parts[0];
+                var password = parts[1];
+
+                if (username == "superadmin" && password == "123123")
                 {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
-                });
-            });
-
-
-
-            services.AddDistributedMemoryCache();
-
-            // Session
-            services.AddSession(option => option.IdleTimeout = TimeSpan.FromMinutes(5));
-
-            services.AddHttpContextAccessor();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
+                  await next.Invoke();
+                  return;
+                }
+              }
             }
 
-            app.UseHttpsRedirection();
+            context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"Swagger\"";
+            context.Response.StatusCode = 401;
+          });
+      });
 
-            // Swagger Middleware
-            app.UseSwagger();
-
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
-            {
-                appBuilder.Use(async (context, next) =>
-                {
-                    string authHeader = context.Request.Headers["Authorization"];
-
-                    if (authHeader != null && authHeader.StartsWith("Basic "))
-                    {
-                        var encoded = authHeader.Substring("Basic ".Length).Trim();
-                        var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-                        var parts = decoded.Split(':');
-
-                        if (parts.Length == 2)
-                        {
-                            var username = parts[0];
-                            var password = parts[1];
-
-                            if (username == "superadmin" && password == "123123")
-                            {
-                                await next.Invoke();
-                                return;
-                            }
-                        }
-                    }
-
-                    context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"Swagger\"";
-                    context.Response.StatusCode = 401;
-                });
-            });
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
-                c.RoutePrefix = "swagger";
-                c.DocumentTitle = "Recruitment API Documentation";
-                c.DocExpansion(DocExpansion.List);
-            });
+      app.UseSwaggerUI(c =>
+      {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
+        c.RoutePrefix = "swagger";
+        c.DocumentTitle = "Recruitment API Documentation";
+        c.DocExpansion(DocExpansion.List);
+      });
 
 
-            app.UseCors("AllowAll");
-            app.UseRouting();
-            app.UseSession();
+      app.UseCors("AllowAll");
+      app.UseRouting();
+      app.UseSession();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+      app.UseAuthentication();
+      app.UseAuthorization();
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
+      app.UseDefaultFiles();
+      app.UseStaticFiles();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+      app.UseEndpoints(endpoints =>
+      {
+        endpoints.MapControllers();
+      });
 
-           
-        }
+
     }
+  }
 }

@@ -1,0 +1,86 @@
+# Project Overview
+- Purpose: Recruitment and Portfolio Management System ("PTP").
+- Core Features: User Management, Authentication (Login/Register/Refresh), File Management, Portfolio tracking.
+- Target Users: Administrators, Job Applicants, Internal Staff.
+
+# Technology Stack
+- Language: C# (.NET 9.0)
+- Framework: ASP.NET Core Web API
+- Database: MariaDB (accessed via Pomelo.EntityFrameworkCore.MySql & Dapper)
+- Third-party Services: Minio (Object Storage)
+- Tooling: Swagger (OpenAPI), Newtonsoft.Json
+- Dependencies: BCrypt.Net (Hashing), NPOI (Excel/Office), System.DirectoryServices (likely LDAP integration unused or specific).
+
+# Architecture
+- Architectural Pattern: Layered Architecture (Controller -> Service -> Data Access).
+- Layer Responsibilities:
+  - **Controllers**: Handle HTTP requests, dependency injection, enforce Auth, delegate to Service, format response using `ResponseStatusHeader`.
+  - **Services**: Business logic, data manipulation, token generation, error handling (try-catch), return `ResponseObject`.
+  - **Repository**: Exists but implementation largely directly in Services using `DbContext` currently (Mixed pattern).
+  - **Models/Dto/ViewModel**: Data containers. `Models` are DB entities. `Dto` for inputs. `ViewModel` for outputs.
+- Dependency Rules: Controllers depend on Services. Services depend on DbContext/Repositories.
+
+# Project Structure Rules
+- Folder responsibilities:
+  - `Controllers`: API Endpoints.
+  - `Service`: Business Logic.
+  - `Models`: Database Entities (Scaffolded from MariaDB).
+  - `Dto`: Data Transfer Objects for Request bodies/queries.
+  - `ViewModel`: Shared response models (`ResponseObject`).
+  - `Components`: Helper logic like `ResponseStatusHeader`.
+  - `Helper`: Static utilities (e.g., `TokenValidation`).
+  - `Interface`: Contracts for Services.
+
+# Coding Standards
+- Naming conventions:
+  - Classes/Methods: PascalCase.
+  - Private fields: camelCase (e.g., `private readonly PTPDevContext context;`).
+  - Parameters: camelCase.
+  - API Routes: `api/[controller]/[action]`.
+- Formatting rules: Standard K&R/Visual Studio defaults. 
+- Code organization: `using` statements at top. Constructor injection for dependencies.
+
+# API & Communication Rules
+- API style: REST-like but with `[action]` routing.
+- Response structure:
+  - All responses are wrapped in `ResponseObject`.
+  - `Status`: HTTP Status Code as Integer (e.g. 200, 400, 500).
+  - `Message`: Human-readable string.
+  - `Data`: Payload object.
+  - Controller usage: `return header.BuildResponse(result);`.
+- Error handling format: 
+  - Controllers do not contain logic.
+  - Services wrap logic in `try-catch`.
+  - On Exception: Return `ResponseObject` with `Status = 500` and `Message = "Error: " + ex.Message`.
+
+# Security Rules
+- Authentication:
+  - JWT Bearer Token.
+  - Custom refresh token flow using `UsersTokens` table.
+  - Passwords hashed with BCrypt.
+  - Basic Auth Middleware hardcoded for Swagger (`superadmin` / `123123`).
+- Authorization: `[Authorize]` attribute on Controllers.
+- Sensitive data handling: `IConfiguration` used for JWT keys and Connection Strings. Minio credentials in config.
+
+# Data Rules
+- Models: Located in `Models/Mysql/PTPDev`. Likely Database-First approach (scaffolded).
+  - **CRITICAL**: The namespace for these models MUST be `AdidataDbContext.Models.Mysql.PTPDev` (lowercase `Mysql`). Do NOT change this to `MySql` even though the folder is named `MySql`. This mismatch is intentional/legacy and changing it will cause duplicate definition errors.
+- Validation: Manual checks in Service (e.g., `if (user == null)`).
+- Migrations: `Migrations` folder present (EF Core Migrations supported).
+
+# Testing Rules
+- Testing strategy: No automated test projects detected. Manual API testing via Swagger.
+- Coverage expectations: Low/None automated.
+
+# Deployment Rules
+- Environments: `Development` and `Production` (via `appsettings.json`).
+- Build & run commands: `dotnet run`, `dotnet build`.
+- Configuration rules: `appsettings.json` keys: `ConnectionStrings:PTP`, `Jwt`, `Minio`.
+
+# Do & Don't
+- **DO**: Use `ResponseObject` for every return value from Service.
+- **DO**: Use `header.BuildResponse()` in Controllers.
+- **DO**: Wrap all Service logic in `try-catch(Exception ex)`.
+- **DO**: Use Constructor Injection.
+- **DON'T**: Return raw entities from Controllers (Use DTOs where possible, though currently mixed).
+- **DON'T**: Put business logic in Controllers.
