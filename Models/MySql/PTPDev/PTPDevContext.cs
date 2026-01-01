@@ -21,6 +21,8 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
     public virtual DbSet<UsersToken> UsersTokens { get; set; } = null!;
     public virtual DbSet<MasterRole> MasterRoles { get; set; } = null!;
     public virtual DbSet<Experience> Experiences { get; set; } = null!;
+    public virtual DbSet<Skill> Skills { get; set; } = null!;
+    public virtual DbSet<Project> Projects { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -43,11 +45,11 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
-          .HasCharSet("utf8mb4");
+      //modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
+      //    .HasCharSet("utf8mb4");
 
-      //modelBuilder.UseCollation("utf8mb4_general_ci");
-      //modelBuilder.HasCharSet("utf8mb4");
+      modelBuilder.UseCollation("utf8mb4_general_ci");
+      modelBuilder.HasCharSet("utf8mb4");
 
       base.OnModelCreating(modelBuilder);
 
@@ -111,6 +113,94 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
                   .HasColumnName("token");
 
         entity.Property(e => e.UserId).HasColumnName("userId");
+      });
+
+      modelBuilder.Entity<Skill>(entity =>
+      {
+        entity.ToTable("skills");
+
+        entity.Property(e => e.Id).HasColumnName("id");
+
+        entity.Property(e => e.Name)
+                  .HasMaxLength(100)
+                  .HasColumnName("name");
+
+        entity.Property(e => e.Category)
+                  .HasMaxLength(100)
+                  .HasColumnName("category");
+
+        entity.Property(e => e.Level)
+                  .HasMaxLength(100)
+                  .HasColumnName("level");
+
+        entity.Property(e => e.IconUrl)
+                  .HasColumnType("text")
+                  .HasColumnName("icon_url");
+
+        entity.Property(e => e.IsFeatured)
+                  .HasColumnName("is_featured");
+
+        entity.Property(e => e.CreatedDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("created_date");
+
+        entity.Property(e => e.UpdateDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("update_date");
+      });
+
+      modelBuilder.Entity<Project>(entity =>
+      {
+        entity.ToTable("projects");
+
+        entity.Property(e => e.Id).HasColumnName("id");
+
+        entity.Property(e => e.Title)
+                  .HasMaxLength(255)
+                  .HasColumnName("title");
+
+        entity.Property(e => e.CoverImageUrl)
+                  .HasColumnType("longtext")
+                  .HasColumnName("cover_image_url");
+
+        entity.Property(e => e.RepositoryUrl)
+                  .HasColumnType("text")
+                  .HasColumnName("repository_url");
+
+        entity.Property(e => e.DemoUrl)
+                  .HasColumnType("text")
+                  .HasColumnName("demo_url");
+
+        entity.Property(e => e.Status)
+                  .HasMaxLength(100)
+                  .HasColumnName("status");
+
+        entity.Property(e => e.StartDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("start_date");
+
+        entity.Property(e => e.Technologies)
+                  .HasColumnType("text")
+                  .HasColumnName("technologies");
+
+        entity.Property(e => e.Summary)
+                  .HasColumnType("text")
+                  .HasColumnName("summary");
+
+        entity.Property(e => e.Description)
+                  .HasColumnType("longtext")
+                  .HasColumnName("description");
+
+        entity.Property(e => e.IsFeatured)
+                  .HasColumnName("is_featured");
+
+        entity.Property(e => e.CreatedDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("created_date");
+
+        entity.Property(e => e.UpdateDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("update_date");
       });
 
       OnModelCreatingPartial(modelBuilder);
