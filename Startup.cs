@@ -37,6 +37,8 @@ namespace PTP
       // Repository & Service
       services.AddScoped<AuthenticationService>();
       services.AddScoped<IExperienceService, ExperienceService>();
+      services.AddScoped<ISkillService, SkillService>();
+      services.AddScoped<IProjectService, ProjectService>();
 
       // Minio
       services.Configure<MinioSettings>(Configuration.GetSection("Minio"));
@@ -84,12 +86,12 @@ namespace PTP
        {
          OnChallenge = context =>
                {
-               context.HandleResponse();
-               context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-               context.Response.ContentType = "application/json";
-               var result = JsonSerializer.Serialize(new { message = "Unauthorized Token" });
-               return context.Response.WriteAsync(result);
-             }
+                 context.HandleResponse();
+                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                 context.Response.ContentType = "application/json";
+                 var result = JsonSerializer.Serialize(new { message = "Unauthorized Token" });
+                 return context.Response.WriteAsync(result);
+               }
        };
      });
 
@@ -131,10 +133,10 @@ namespace PTP
       {
         options.AddPolicy("AllowAll", policy =>
               {
-            policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-          });
+                policy.AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+              });
       });
 
 
@@ -164,30 +166,30 @@ namespace PTP
       {
         appBuilder.Use(async (context, next) =>
               {
-            string authHeader = context.Request.Headers["Authorization"];
+                string authHeader = context.Request.Headers["Authorization"];
 
-            if (authHeader != null && authHeader.StartsWith("Basic "))
-            {
-              var encoded = authHeader.Substring("Basic ".Length).Trim();
-              var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-              var parts = decoded.Split(':');
-
-              if (parts.Length == 2)
-              {
-                var username = parts[0];
-                var password = parts[1];
-
-                if (username == "superadmin" && password == "123123")
+                if (authHeader != null && authHeader.StartsWith("Basic "))
                 {
-                  await next.Invoke();
-                  return;
-                }
-              }
-            }
+                  var encoded = authHeader.Substring("Basic ".Length).Trim();
+                  var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
+                  var parts = decoded.Split(':');
 
-            context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"Swagger\"";
-            context.Response.StatusCode = 401;
-          });
+                  if (parts.Length == 2)
+                  {
+                    var username = parts[0];
+                    var password = parts[1];
+
+                    if (username == "superadmin" && password == "123123")
+                    {
+                      await next.Invoke();
+                      return;
+                    }
+                  }
+                }
+
+                context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"Swagger\"";
+                context.Response.StatusCode = 401;
+              });
       });
 
       app.UseSwaggerUI(c =>
