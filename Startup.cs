@@ -37,6 +37,7 @@ namespace PTP
       // Repository & Service
       services.AddScoped<AuthenticationService>();
       services.AddScoped<IExperienceService, ExperienceService>();
+      services.AddScoped<IArticleService, ArticleService>();
       services.AddScoped<ISkillService, SkillService>();
       services.AddScoped<IProjectService, ProjectService>();
 

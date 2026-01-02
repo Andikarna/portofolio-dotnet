@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using PTP.Models.MySql.PTPDev;
 
+
 namespace AdidataDbContext.Models.Mysql.PTPDev
 {
   public partial class PTPDevContext : DbContext
@@ -23,6 +24,7 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
     public virtual DbSet<Experience> Experiences { get; set; } = null!;
     public virtual DbSet<Skill> Skills { get; set; } = null!;
     public virtual DbSet<Project> Projects { get; set; } = null!;
+    public virtual DbSet<PortoArticle> Articles { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -193,6 +195,41 @@ namespace AdidataDbContext.Models.Mysql.PTPDev
 
         entity.Property(e => e.IsFeatured)
                   .HasColumnName("is_featured");
+
+        entity.Property(e => e.CreatedDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("created_date");
+
+        entity.Property(e => e.UpdateDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("update_date");
+      });
+
+      modelBuilder.Entity<PortoArticle>(entity =>
+      {
+        entity.ToTable("articles");
+
+        entity.Property(e => e.Id).HasColumnName("id");
+
+        entity.Property(e => e.Title)
+                  .HasMaxLength(255)
+                  .HasColumnName("title");
+
+        entity.Property(e => e.Content)
+                  .HasColumnType("longtext")
+                  .HasColumnName("content");
+
+        entity.Property(e => e.ImageBase64)
+                  .HasColumnType("longtext")
+                  .HasColumnName("image_base64");
+
+        entity.Property(e => e.PublicationDate)
+                  .HasColumnType("datetime")
+                  .HasColumnName("publication_date");
+
+        entity.Property(e => e.Tags)
+                  .HasColumnType("text")
+                  .HasColumnName("tags");
 
         entity.Property(e => e.CreatedDate)
                   .HasColumnType("datetime")
